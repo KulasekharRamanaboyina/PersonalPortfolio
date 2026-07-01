@@ -51,7 +51,7 @@ export const PROJECTS: Project[] = [
   {
     title: 'Spammer Detection System',
     description: 'Built to spot fake Instagram accounts using a Random Forest ML model.',
-    image: '/images/projects/spam detection.webp',
+    image: '/images/projects/spam detection.png',
     liveUrl: '#projects', // No live demo listed in original, just a local anchor
     githubUrl: 'https://github.com/KulasekharRamanaboyina/Spammer-Detection',
     tags: ['Machine Learning', 'Python', 'Random Forest', 'Social Net'],
