@@ -45,7 +45,7 @@ export const PROJECTS: Project[] = [
 
     githubUrl: "#projects", // no repository maintained as this is not a personal project
 
-    liveUrl: "https://lattice.all4.com",
+    liveUrl: "https://lattice.all4ps.co",
 
   },
   {

@@ -8,7 +8,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Section from '../ui/Section';
 import Container from '../ui/Container';
 import Heading from '../ui/Heading';
-import Reveal from '../ui/Reveal';
 import ProjectCard from '../ui/ProjectCard';
 import { GithubIcon, GlobeIcon } from '../ui/Icons';
 
@@ -16,19 +15,19 @@ import { PROJECTS } from '../../constants/projects';
 import { splitWords } from '../../animations/text';
 
 export const Projects = () => {
-  const rootRef   = useRef<HTMLDivElement>(null);
-  const stageRef  = useRef<HTMLDivElement>(null);   // the perspective stage
+  const rootRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);   // the perspective stage
 
   const getBentoSpan = (index: number) => {
     switch (index) {
-      case 0:  return 'md:col-span-2 col-span-1';
-      case 1:  return 'md:col-span-1 col-span-1';
-      case 2:  return 'md:col-span-1 col-span-1';
-      case 3:  return 'md:col-span-2 col-span-1';
-      case 4:  return 'md:col-span-2 col-span-1';
-      case 5:  return 'md:col-span-1 col-span-1';
-      case 6:  return 'md:col-span-2 col-span-1';
-      case 7:  return 'md:col-span-1 col-span-1';
+      case 0: return 'md:col-span-2 col-span-1';
+      case 1: return 'md:col-span-1 col-span-1';
+      case 2: return 'md:col-span-1 col-span-1';
+      case 3: return 'md:col-span-2 col-span-1';
+      case 4: return 'md:col-span-2 col-span-1';
+      case 5: return 'md:col-span-1 col-span-1';
+      case 6: return 'md:col-span-2 col-span-1';
+      case 7: return 'md:col-span-1 col-span-1';
       default: return 'md:col-span-1 col-span-1';
     }
   };
@@ -40,37 +39,77 @@ export const Projects = () => {
 
       // ── Heading reveal ────────────────────────────────────────────────────
       gsap.set('.projects-heading-word', { yPercent: 110 });
-      gsap.set('.projects-label',        { opacity: 0, x: -30 });
-      gsap.set('.projects-description',  { opacity: 0, y: 40, filter: 'blur(8px)' });
+      gsap.set('.projects-label', { opacity: 0, x: -30 });
+      gsap.set('.projects-description', { opacity: 0, y: 40, filter: 'blur(8px)' });
 
       gsap.timeline({ scrollTrigger: { trigger: '.projects-heading', start: 'top 88%' } })
-        .to('.projects-label',        { opacity: 1, x: 0, duration: 0.8, ease: 'power3.out' })
+        .to('.projects-label', { opacity: 1, x: 0, duration: 0.8, ease: 'power3.out' })
         .to('.projects-heading-word', { yPercent: 0, duration: 1, stagger: 0.08, ease: 'power4.out' }, '-=0.45')
-        .to('.projects-description',  { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.8, ease: 'power3.out' }, '-=0.65');
+        .to('.projects-description', { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.8, ease: 'power3.out' }, '-=0.65');
+
+      const projectCards = gsap.utils.toArray<HTMLElement>('.project-card');
+
+      gsap.set(projectCards, {
+        opacity: 0,
+        x: (index) => {
+          const column = window.matchMedia('(min-width: 768px)').matches ? index % 3 : index % 2;
+          return column === 1 ? 120 : -120;
+        },
+        y: 26,
+        scale: 0.96,
+        filter: 'blur(10px)',
+      });
+
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: '.projects-grid',
+          start: 'top 68%',
+          once: true,
+        },
+      }).to(projectCards, {
+        opacity: 1,
+        x: 0,
+        y: 0,
+        scale: 1,
+        filter: 'blur(0px)',
+        duration: 1.05,
+        ease: 'power4.out',
+        stagger: 0.09,
+      });
 
       // ── Desktop: 3D cube scroll ─────────────────────────────────────────
-      if (!window.matchMedia('(min-width: 1024px)').matches) return;
+      if (!window.matchMedia('(min-width: 99999px)').matches) return;
 
-      const stage  = stageRef.current;
-      const pinEl  = document.getElementById('projects');
+      const stage = stageRef.current;
+      const pinEl = document.getElementById('projects');
       if (!stage || !pinEl) return;
 
-      const cards  = Array.from(stage.querySelectorAll<HTMLElement>('.cube-face'));
-      const dots   = Array.from(document.querySelectorAll<HTMLElement>('.cube-dot'));
-      const numEl  = document.querySelector<HTMLElement>('.cube-num');
+      const cards = Array.from(stage.querySelectorAll<HTMLElement>('.cube-face'));
+      const dots = Array.from(document.querySelectorAll<HTMLElement>('.cube-dot'));
+      const numEl = document.querySelector<HTMLElement>('.cube-num');
 
       if (!cards.length) return;
 
       // Make only card 0 visible — all others already hidden via CSS
       // (initial state is set inline in JSX so no flash on first paint)
+      gsap.set(cards.slice(1), {
+        visibility: 'hidden',
+        autoAlpha: 0,
+        rotateY: 90,
+        transformOrigin: '50% 50%',
+      });
 
+      const perCardDistance = 140;
+      const totalDistance = Math.max((cards.length - 1) * perCardDistance, window.innerHeight * 1.3);
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: pinEl,
-          start: 'top top',
-          end: () => `+=${(cards.length - 1) * 100}vh`,
+          start: 'top 92%',
+          end: () => `+=${totalDistance}`,
           pin: true,
+          pinSpacing: false,
           scrub: 1,
+          anticipatePin: 1,
           invalidateOnRefresh: true,
         },
       });
@@ -79,7 +118,7 @@ export const Projects = () => {
         if (i >= cards.length - 1) return;
 
         const next = cards[i + 1];
-        const t    = i; // each step occupies 1 time unit
+        const t = i; // each step occupies 1 time unit
 
         // Step 1 — rotate current card out to the left (-90 deg)
         // Step 2 — rotate next card in from the right (90 → 0)
@@ -88,30 +127,31 @@ export const Projects = () => {
           .to(card, {
             rotateY: -90,
             autoAlpha: 0,
-            duration: 1,
+            duration: 0.9,
             ease: 'power2.inOut',
             transformOrigin: 'left center',
           }, t)
-          .set(card, { visibility: 'hidden' }, t + 1)          // fully hide after done
+          .set(card, { visibility: 'hidden' }, t + 0.9)      // fully hide after done
           .set(next, { visibility: 'visible' }, t)             // make next visible before it animates in
           .fromTo(next,
             { rotateY: 90, autoAlpha: 0, transformOrigin: 'right center' },
-            { rotateY: 0,  autoAlpha: 1, duration: 1, ease: 'power2.inOut', transformOrigin: '50% 50%' },
+            { rotateY: 0, autoAlpha: 1, duration: 0.9, ease: 'power2.inOut', transformOrigin: '50% 50%' },
             t,
           );
 
-        // Update counter
+        // Update counter — fires AFTER the flip completes (t+1) so only
+        // the newly-arrived card shows the updated number
         if (numEl) {
           tl.to(numEl, {
             innerHTML: String(i + 2).padStart(2, '0'),
             duration: 0.01,
-          }, t + 0.5);
+          }, t + 0.9);
         }
 
-        // Update dots
+        // Update dots — after flip completes so active dot matches visible card
         if (dots.length) {
-          tl.to(dots[i],     { scale: 0.6, opacity: 0.3, duration: 0.3 }, t)
-            .to(dots[i + 1], { scale: 1.2, opacity: 1,   duration: 0.3 }, t);
+          tl.to(dots[i],     { scale: 0.6, opacity: 0.3, duration: 0.25 }, t + 0.8)
+            .to(dots[i + 1], { scale: 1.2, opacity: 1,   duration: 0.25 }, t + 0.8);
         }
       });
 
@@ -121,8 +161,8 @@ export const Projects = () => {
   }, []);
 
   return (
-    <div ref={rootRef}>
-      <Section id="projects" bg="white" className="projects-section relative">
+    <div ref={rootRef} className="relative z-0">
+      <Section id="projects" bg="white" className="projects-section relative py-20 md:py-28 lg:py-32 xl:py-40 lg:flex lg:flex-col lg:justify-center overflow-visible">
 
         {/* Ambient orbs */}
         <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
@@ -131,7 +171,7 @@ export const Projects = () => {
         </div>
 
         {/* ── Heading ──────────────────────────────────────────────────────── */}
-        <Container className="relative z-10 mb-10 lg:mb-12">
+        <Container className="relative z-10 mb-8 lg:mb-6 xl:mb-10">
           <div className="flex flex-col items-start projects-heading">
             <span className="projects-label font-body text-[10px] md:text-xs font-bold tracking-widest text-navy uppercase mb-3 block opacity-0">
               04 / GALLERY
@@ -156,23 +196,21 @@ export const Projects = () => {
         </Container>
 
         {/* ── Mobile / Tablet: Bento Grid ──────────────────────────────────── */}
-        <Container className="relative z-10 lg:hidden">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-4">
+        <Container className="relative z-10">
+          <div className="projects-grid grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 pb-4 overflow-hidden">
             {PROJECTS.map((project, idx) => (
-              <Reveal
+              <div
                 key={project.title}
-                animation="fade-up"
-                delay={idx * 0.08}
                 className={`project-card ${getBentoSpan(idx)}`}
               >
                 <ProjectCard project={project} />
-              </Reveal>
+              </div>
             ))}
           </div>
         </Container>
 
         {/* ── Desktop: 3D Cube Card ────────────────────────────────────────── */}
-        <div className="hidden lg:flex items-center justify-center relative pb-12">
+        <div className="hidden items-center justify-center relative pb-6 xl:pb-12">
 
           {/* Counter */}
           <div className="absolute top-0 left-[10vw] flex items-baseline gap-1.5 z-10">
@@ -188,32 +226,29 @@ export const Projects = () => {
           */}
           <div
             ref={stageRef}
-            style={{
-              width: '520px',
-              height: '560px',
-              position: 'relative',
-              perspective: '1200px',
-              perspectiveOrigin: '50% 50%',
-            }}
+            className="cube-stage relative w-[min(92vw,980px)] h-[560px] xl:h-[640px]"
+            style={{ perspective: '1800px', transformStyle: 'preserve-3d' }}
           >
             {PROJECTS.map((project, idx) => (
               <div
                 key={`cube-face-${idx}`}
-                className="cube-face absolute inset-0 rounded-2xl overflow-hidden bg-white"
+                className="cube-face absolute inset-0 w-full h-full rounded-2xl overflow-hidden bg-white flex flex-col"
                 style={{
                   /* Initial state in CSS so there's no flash before GSAP runs */
-                  opacity:       idx === 0 ? 1 : 0,
-                  visibility:    idx === 0 ? 'visible' : 'hidden',
-                  transform:     idx === 0 ? 'rotateY(0deg)' : 'rotateY(90deg)',
+                  opacity: idx === 0 ? 1 : 0,
+                  visibility: idx === 0 ? 'visible' : 'hidden',
+                  transform: idx === 0 ? 'rotateY(0deg)' : 'rotateY(90deg)',
                   transformOrigin: '50% 50%',
                   backfaceVisibility: 'hidden',
                   willChange: 'transform, opacity',
                   boxShadow: '0 4px 0 0 #1e3a8a, 0 8px 0 0 rgba(30,64,175,0.15), 0 24px 80px -10px rgba(30,58,138,0.20), 0 12px 32px -4px rgba(0,0,0,0.12)',
                   borderTop: '3px solid #1e40af',
+                  display: 'flex',
+                  flexDirection: 'column',
                 }}
               >
                 {/* Image */}
-                <div className="relative w-full" style={{ height: '300px' }}>
+                <div className="cube-image-container relative h-[260px] xl:h-[300px] flex-shrink-0">
                   <Image
                     src={project.image}
                     alt={project.title}
@@ -233,7 +268,7 @@ export const Projects = () => {
                 </div>
 
                 {/* Card body */}
-                <div className="p-5 flex flex-col gap-3">
+                <div className="flex-1 p-5 flex flex-col gap-3">
                   <div className="flex flex-wrap gap-1.5">
                     {project.tags.slice(0, 4).map((tag) => (
                       <span
@@ -283,7 +318,7 @@ export const Projects = () => {
                 style={{
                   width: '6px',
                   height: '6px',
-                  opacity:   idx === 0 ? 1   : 0.3,
+                  opacity: idx === 0 ? 1 : 0.3,
                   transform: idx === 0 ? 'scale(1.2)' : 'scale(0.6)',
                 }}
               />

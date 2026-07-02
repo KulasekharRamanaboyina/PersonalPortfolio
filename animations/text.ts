@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * Helper to split text into words, preserving spaces
  */

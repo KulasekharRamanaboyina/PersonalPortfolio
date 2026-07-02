@@ -53,7 +53,7 @@ export const LenisProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <LenisContext.Provider value={lenisRef.current}>
+    <LenisContext.Provider value={null}>
       <div className="lenis-smooth">
         {children}
       </div>

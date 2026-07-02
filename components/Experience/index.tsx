@@ -1,11 +1,13 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Section from '../ui/Section';
 import Container from '../ui/Container';
 import Heading from '../ui/Heading';
 import Reveal from '../ui/Reveal';
-import { useExperienceScroll } from '../../hooks/useExperienceScroll';
 
 interface ExperienceItem {
   year: string;
@@ -25,7 +27,7 @@ const EXPERIENCES: ExperienceItem[] = [
     company: 'Neural Arc Global Pvt. Ltd, Coimbatore',
     period: 'Jun 2023 – Jul 2023',
     type: 'ON-SITE',
-    logoIcon: <img src="/images/experience/neural-arc.jpg" alt="Neural Arc Global" className="w-full h-full object-cover" />,
+    logoIcon: <Image src="/images/experience/neural-arc.jpg" alt="Neural Arc Global" width={48} height={48} className="w-full h-full object-cover" />,
     summary: 'Worked on developing and maintaining web applications and internal tools.',
     responsibilities: [
       'Developed responsive web pages using HTML, CSS, JavaScript.',
@@ -40,7 +42,7 @@ const EXPERIENCES: ExperienceItem[] = [
     company: 'Coincent.ai',
     period: 'Jun 2024 – Jul 2024',
     type: 'VIRTUAL',
-    logoIcon: <img src="/images/experience/coincent.jpg" alt="Coincent.ai" className="w-full h-full object-cover" />,
+    logoIcon: <Image src="/images/experience/coincent.jpg" alt="Coincent.ai" width={48} height={48} className="w-full h-full object-cover" />,
     summary: 'Worked on building and maintaining web applications for AI-driven solutions.',
     responsibilities: [
       'Built responsive UI using React.js and Tailwind CSS.',
@@ -55,7 +57,7 @@ const EXPERIENCES: ExperienceItem[] = [
     company: 'all4Ps Private Limited',
     period: 'Aug 2025 – Jun 2026',
     type: 'ON-SITE',
-    logoIcon: <img src="/images/experience/all4ps.jpg" alt="all4Ps Private Limited" className="w-full h-full object-cover" />,
+    logoIcon: <Image src="/images/experience/all4ps.jpg" alt="all4Ps Private Limited" width={48} height={48} className="w-full h-full object-cover" />,
     summary: 'Worked closely with the founders on strategic initiatives and internal projects.',
     responsibilities: [
       'Led development of an internal Project Management Tool.',
@@ -70,7 +72,7 @@ const EXPERIENCES: ExperienceItem[] = [
     company: 'Quantira Technologies',
     period: 'Jun 2026 – Present',
     type: 'ON-SITE',
-    logoIcon: <img src="/images/experience/quantira.jpg" alt="Quantira Technologies" className="w-full h-full object-cover" />,
+    logoIcon: <Image src="/images/experience/quantira.jpg" alt="Quantira Technologies" width={48} height={48} className="w-full h-full object-cover" />,
     summary: 'Building modern web applications and learning advanced engineering practices.',
     responsibilities: [
       'Developing scalable applications using React and Next.js.',
@@ -135,7 +137,7 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({ exp, className = '', is
   };
 
   return (
-    <div id='experience'
+    <div
       className={`exp-inner-card bg-white frosted-noise rounded-[24px] p-6 text-left select-none relative group cursor-pointer overflow-hidden border border-neutral-200/60 transition-all duration-500 ${className}`}
       style={{
         backgroundColor: '#ffffff',
@@ -215,144 +217,160 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({ exp, className = '', is
 };
 
 export const Experience = () => {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const viewportRef = useRef<HTMLDivElement | null>(null);
+  const trackRef = useRef<HTMLDivElement | null>(null);
   const progressRef = useRef<HTMLDivElement | null>(null);
 
-  // Initialize horizontal scrolling ScrollTrigger for desktop viewports
-  useExperienceScroll(containerRef, scrollRef, progressRef);
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const section = sectionRef.current;
+    const viewport = viewportRef.current;
+    const track = trackRef.current;
+    const progress = progressRef.current;
+
+    if (!section || !viewport || !track) return;
+
+    const ctx = gsap.context(() => {
+      const setupHorizontalScroll = () => {
+        const scrollDistance = Math.max(0, track.scrollWidth - viewport.clientWidth);
+
+        gsap.set(track, { x: 0 });
+        if (progress) {
+          gsap.set(progress, { scaleX: 0, transformOrigin: 'left center' });
+        }
+
+        if (scrollDistance < 8) {
+          return undefined;
+        }
+
+        const timeline = gsap.timeline({
+          defaults: { ease: 'none' },
+          scrollTrigger: {
+            trigger: section,
+            start: 'top top',
+            end: () => `+=${scrollDistance + Math.round(window.innerHeight * 0.35)}`,
+            pin: true,
+            scrub: 0.8,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+          },
+        });
+
+        timeline
+          .to(track, { x: -scrollDistance }, 0);
+
+        if (progress) {
+          timeline.to(progress, { scaleX: 1 }, 0);
+        }
+
+        const cards = gsap.utils.toArray<HTMLElement>('.experience-slide-card');
+        const cardTriggers = cards.map((card) =>
+          ScrollTrigger.create({
+            trigger: card,
+            containerAnimation: timeline,
+            start: 'left 80%',
+            end: 'right 20%',
+            scrub: true,
+            animation: gsap
+              .timeline()
+              .fromTo(
+                card,
+                { opacity: 0.55, scale: 0.94, y: 24 },
+                { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: 'power2.out' }
+              )
+              .to(card, { opacity: 0.7, scale: 0.96, y: -10, duration: 0.5, ease: 'power2.in' }),
+          })
+        );
+
+        return () => {
+          timeline.scrollTrigger?.kill();
+          timeline.kill();
+          cardTriggers.forEach((trigger) => trigger.kill());
+        };
+      };
+
+      let cleanup = setupHorizontalScroll();
+
+      const handleResize = () => {
+        cleanup?.();
+        cleanup = setupHorizontalScroll();
+        ScrollTrigger.refresh();
+      };
+
+      window.addEventListener('resize', handleResize);
+
+      return () => {
+        window.removeEventListener('resize', handleResize);
+        cleanup?.();
+      };
+    }, section);
+
+    return () => ctx.revert();
+  }, []);
 
   return (
-    <>
-      {/* 1. DESKTOP LAYOUT - Horizontal Scroll Track (1024px and up) */}
-      <div
-        ref={containerRef}
-        className="hidden lg:block relative h-screen bg-white flex-shrink-0 overflow-hidden"
-        style={{ width: 'fit-content' }}
-      >
-        <div className="absolute inset-0 mesh-gradient pointer-events-none" />
-
-        <div className="h-full flex flex-row items-center relative z-10 select-none">
-          {/* Header Column */}
-          {/* <div className="w-[35vw] flex-shrink-0 px-16 flex flex-col items-start justify-center text-left"> */}
-          <div className="w-[35vw] flex-shrink-0 pl-90 pr-8 flex flex-col items-start justify-center text-left">
-            <span className="font-body text-xs font-bold tracking-widest text-navy uppercase mb-2 block">
-              02 / HISTORY
-            </span>
-            {/* <Heading level={2} className="tracking-tighter text-5xl font-extrabold text-neutral-900 mb-3 leading-tight"> */}
-            <Heading level={2} className="tracking-tighter about-heading font-logo italic font-light overflow-hidden py-1">
-
-              Experience <br></br><span className="text-navy bg-gradient-to-r from-navy via-blue-500 to-navy bg-clip-text text-transparent">Timeline</span>
-            </Heading>
-            <p className="font-body text-sm text-neutral-400 max-w-sm font-light leading-relaxed">
-              A journey of continuous learning, building, and creating impact through technology and&nbsp;innovation.
-            </p>
-          </div>
-
-          {/* Horizontal Cards Column */}
-          <div
-            ref={scrollRef}
-            className="flex flex-row items-center pl-8 pr-[20vw] relative select-none mt-4"
-          >
-            {EXPERIENCES.map((exp, idx) => (
-              <React.Fragment key={`h-fragment-${idx}`}>
-                <div
-                  className="experience-card-horizontal w-[460px] md:w-[480px] flex-shrink-0 relative z-10"
-                >
-                  {/* Year Watermark */}
-                  <div className="absolute -top-16 -right-4 font-heading text-8xl font-black text-neutral-100/60 select-none pointer-events-none z-0">
-                    {exp.year}
-                  </div>
-
-                  <ExperienceCard exp={exp} className="h-[370px]" />
-                </div>
-
-                {/* Horizontal timeline connector dots */}
-                {idx < EXPERIENCES.length - 1 && (
-                  <div className="w-20 flex-shrink-0 flex items-center justify-center relative h-[370px] z-0">
-                    <div className="w-full h-[1.5px] bg-navy/35 shadow-[0_0_4px_rgba(11,61,145,0.2)]" />
-                    <div className="absolute w-5 h-5 rounded-full border border-navy/40 bg-[#0F0F0F] flex items-center justify-center shadow-[0_0_15px_rgba(11,61,145,0.2)]">
-                      <div className="w-1.5 h-1.5 rounded-full bg-navy animate-pulse" />
-                    </div>
-                  </div>
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* 2. TABLET LAYOUT - Horizontal Swipe Track (768px to 1024px) */}
-      <div className="hidden md:block lg:hidden">
-        <Section id="experience-tablet" bg="white" className="py-24">
-          <Container className="flex flex-col gap-16">
-            <div className="flex flex-col items-start">
-              <span className="font-body text-xs font-bold tracking-widest text-navy uppercase mb-2 block">
+    <Section
+      ref={sectionRef}
+      id="experience"
+      bg="white"
+      className="py-16 md:py-20 lg:py-24 min-h-screen flex items-center overflow-hidden"
+    >
+      <Container className="flex flex-col gap-10 lg:gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-end">
+          <div className="lg:col-span-5">
+            <Reveal animation="fade-up">
+              <span className="font-body text-[10px] md:text-xs font-bold tracking-widest text-navy uppercase mb-3 block">
                 02 / HISTORY
               </span>
-              <Heading level={2} className="tracking-tighter font-extrabold text-neutral-900 mb-2">
+              <Heading level={2} className="tracking-tighter font-logo italic font-light overflow-hidden py-1">
                 Experience <span className="text-navy bg-gradient-to-r from-navy via-blue-500 to-navy bg-clip-text text-transparent">Timeline</span>
               </Heading>
-              <p className="font-body text-sm text-neutral-400 max-w-2xl font-light">
-                A journey of continuous learning, building, and creating impact through technology and&nbsp;innovation.
-              </p>
-            </div>
+            </Reveal>
+          </div>
 
-            {/* Swipeable row with native snap physics */}
-            <div className="flex flex-row overflow-x-auto snap-x snap-mandatory scrollbar-none gap-6 pb-8 px-4">
-              {EXPERIENCES.map((exp, idx) => (
-                <div key={`t-${idx}`} className="snap-center flex-shrink-0 w-[420px] relative">
-                  <div className="absolute -top-12 -right-2 font-heading text-6xl font-black text-neutral-100/60 pointer-events-none select-none">
-                    {exp.year}
-                  </div>
-                  <ExperienceCard exp={exp} className="h-[370px]" isMobile={true} />
+          <Reveal animation="fade-up" delay={0.08} className="lg:col-span-7">
+            <p className="font-body text-sm md:text-base text-neutral-500 font-light leading-relaxed max-w-2xl lg:ml-auto">
+              Scroll down to move through the roles, internships, and product work that shaped my engineering practice.
+            </p>
+          </Reveal>
+        </div>
+
+        <div className="relative">
+          <div
+            ref={viewportRef}
+            className="overflow-hidden"
+          >
+            <div
+              ref={trackRef}
+              className="flex w-max items-stretch gap-5 sm:gap-6 lg:gap-8 will-change-transform"
+            >
+              {EXPERIENCES.map((exp) => (
+                <div
+                  key={`${exp.company}-${exp.year}`}
+                  className="experience-slide-card relative w-[calc(100vw-3rem)] max-w-[380px] sm:w-[420px] sm:max-w-none lg:w-[470px] flex-shrink-0 py-6"
+                >
+                <div className="absolute -top-5 right-5 font-heading text-5xl md:text-6xl font-black text-neutral-100 select-none pointer-events-none z-0">
+                  {exp.year}
+                </div>
+                  <ExperienceCard exp={exp} className="h-full min-h-[360px]" isMobile={true} />
                 </div>
               ))}
             </div>
-          </Container>
-        </Section>
-      </div>
+          </div>
 
-      {/* 3. MOBILE LAYOUT - Elegant Vertical Stacking (under 768px) */}
-      <div className="block md:hidden">
-        <Section id="experience" bg="white" className="py-20">
-          <Container className="flex flex-col gap-14">
-
-            {/* Title */}
-            <div className="flex flex-col items-start">
-              <Reveal animation="fade-up">
-                <span className="font-body text-xs font-bold tracking-widest text-navy uppercase mb-2 block">
-                  02 / HISTORY
-                </span>
-                <Heading level={2} className="tracking-tighter font-extrabold text-neutral-900 mb-2">
-                  Experience <span className="text-navy bg-gradient-to-r from-navy via-blue-500 to-navy bg-clip-text text-transparent">Timeline</span>
-                </Heading>
-                <p className="font-body text-xs text-neutral-400 font-light max-w-lg">
-                  A journey of continuous learning, building, and creating impact through technology and&nbsp;innovation.
-                </p>
-              </Reveal>
+          <div className="mt-6 flex items-center gap-4">
+            <div className="h-px flex-1 bg-neutral-200 overflow-hidden">
+              <div ref={progressRef} className="h-full w-full origin-left scale-x-0 bg-navy" />
             </div>
-
-            {/* Vertical timeline stack */}
-            <div className="relative pl-5">
-              <div className="absolute left-2 top-2 bottom-6 w-[1px] bg-neutral-200" />
-
-              <div className="flex flex-col gap-8">
-                {EXPERIENCES.map((exp, idx) => (
-                  <div key={`m-${idx}`} className="relative">
-                    <div className="absolute -left-[25px] top-6 w-2.5 h-2.5 rounded-full border border-navy bg-white z-10" />
-
-                    <Reveal animation="fade-up" delay={idx * 0.08}>
-                      <ExperienceCard exp={exp} className="h-auto" isMobile={true} />
-                    </Reveal>
-                  </div>
-                ))}
+            <span className="font-body text-[10px] font-bold uppercase tracking-widest text-neutral-400">
+              Scroll
+            </span>
               </div>
-            </div>
-          </Container>
-        </Section>
-      </div>
-    </>
+        </div>
+      </Container>
+    </Section>
   );
 };
 

@@ -15,7 +15,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   target?: string;
 }
 
-export const Button = React.forwardRef<any, ButtonProps>(
+export const Button = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
   (
     {
       children,
@@ -32,7 +32,7 @@ export const Button = React.forwardRef<any, ButtonProps>(
     ref
   ) => {
     // If magnetic is true, initialize hook. Otherwise, pass a dummy or bypass.
-    const internalRef = useMagnetic<any>(magnetic ? magneticStrength : 0);
+    const internalRef = useMagnetic<HTMLElement>(magnetic ? magneticStrength : 0);
     const { setCursorType } = useCursor();
 
     const baseStyles =
@@ -57,22 +57,33 @@ export const Button = React.forwardRef<any, ButtonProps>(
       setCursorType('default');
     };
 
-    const renderProps = {
-      ref: magnetic ? internalRef : ref,
-      className: cn(baseStyles, variantStyles[variant], className),
-      onMouseEnter: handleMouseEnter,
-      onMouseLeave: handleMouseLeave,
+    const attachRef = (node: HTMLAnchorElement | HTMLButtonElement | null) => {
+      if (magnetic) {
+        internalRef.current = node;
+        return;
+      }
+
+      if (typeof ref === 'function') {
+        ref(node);
+      } else if (ref) {
+        ref.current = node;
+      }
     };
 
     if (asLink && href) {
+      const anchorProps = props as React.AnchorHTMLAttributes<HTMLAnchorElement>;
+
       return (
         <a
+          ref={attachRef}
           href={href}
           download={download}
           target={target}
           rel={target === '_blank' ? 'noopener noreferrer' : undefined}
-          {...(renderProps as any)}
-          {...(props as any)}
+          className={cn(baseStyles, variantStyles[variant], className)}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          {...anchorProps}
         >
           {children}
         </a>
@@ -80,7 +91,13 @@ export const Button = React.forwardRef<any, ButtonProps>(
     }
 
     return (
-      <button {...renderProps} {...props}>
+      <button
+        ref={attachRef}
+        className={cn(baseStyles, variantStyles[variant], className)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        {...props}
+      >
         {children}
       </button>
     );
