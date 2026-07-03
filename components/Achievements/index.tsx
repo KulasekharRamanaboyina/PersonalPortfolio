@@ -32,6 +32,8 @@ const ACHIEVEMENTS_DATA: Achievement[] = [
   },
 ];
 
+const PAPER_PIECES = Array.from({ length: 14 }, (_, index) => index);
+
 export const Achievements = () => {
   return (
     <Section id="achievements" bg="white">
@@ -53,11 +55,17 @@ export const Achievements = () => {
         <div className="lg:col-span-8 flex flex-col gap-6">
           {ACHIEVEMENTS_DATA.map((item, idx) => (
             <Reveal key={item.title} animation="fade-up" delay={idx * 0.15}>
-              <GlassCard className="border border-neutral-100 bg-white p-6 sm:p-8 flex gap-6 items-start hover:shadow-lg hover:border-navy/10 transition-all duration-300">
-                <div className="p-3 bg-navy/5 rounded-2xl flex-shrink-0">
+              <GlassCard className="achievement-card group border border-neutral-100 bg-white p-6 sm:p-8 flex gap-6 items-start hover:shadow-xl hover:border-navy/20 hover:-translate-y-1 transition-all duration-300 relative overflow-visible">
+                <div className="paper-blast pointer-events-none absolute inset-0 z-0" aria-hidden="true">
+                  {PAPER_PIECES.map((piece) => (
+                    <span key={piece} className="paper-piece" />
+                  ))}
+                </div>
+
+                <div className="relative z-10 p-3 bg-navy/5 rounded-2xl flex-shrink-0 group-hover:bg-navy group-hover:[&_svg]:text-white transition-colors duration-300">
                   {item.icon}
                 </div>
-                <div className="flex flex-col text-left">
+                <div className="relative z-10 flex flex-col text-left">
                   <h3 className="font-heading text-lg md:text-xl font-bold text-foreground mb-1">
                     {item.title}
                   </h3>

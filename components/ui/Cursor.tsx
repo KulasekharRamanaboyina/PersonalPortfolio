@@ -11,10 +11,15 @@ export const Cursor = () => {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  // Smooth springs for cursor movement
-  const springConfig = { damping: 35, stiffness: 350, mass: 0.35 };
-  const cursorX = useSpring(mouseX, springConfig);
-  const cursorY = useSpring(mouseY, springConfig);
+  // Outer ring spring (slower, floating catch-up effect)
+  const ringSpringConfig = { damping: 30, stiffness: 220, mass: 0.6 };
+  const ringX = useSpring(mouseX, ringSpringConfig);
+  const ringY = useSpring(mouseY, ringSpringConfig);
+
+  // Inner dot spring (faster, precise responsive effect)
+  const dotSpringConfig = { damping: 40, stiffness: 450, mass: 0.15 };
+  const dotX = useSpring(mouseX, dotSpringConfig);
+  const dotY = useSpring(mouseY, dotSpringConfig);
 
   useEffect(() => {
     // Hide mouse follower on touch screens
@@ -40,35 +45,76 @@ export const Cursor = () => {
     };
   }, [mouseX, mouseY, isVisible]);
 
-  // Map cursorType to custom sizing, colors, and border shapes
-  const variants = {
+  // Outer ring variants (colored blue with custom glow)
+  const ringVariants = {
     default: {
-      width: 14,
-      height: 14,
-      backgroundColor: 'rgba(255, 255, 255, 0)',
-      border: '1px solid #FFFFFF',
+      width: 28,
+      height: 28,
+      backgroundColor: 'rgba(37, 99, 235, 0.01)',
+      border: '1.5px solid rgba(37, 99, 235, 0.45)',
+      boxShadow: '0 0 12px rgba(37, 99, 235, 0.35), inset 0 0 8px rgba(37, 99, 235, 0.1)',
       opacity: 1,
     },
     hover: {
-      width: 28,
-      height: 28,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-      border: '1px solid #FFFFFF',
+      width: 44,
+      height: 44,
+      backgroundColor: 'rgba(37, 99, 235, 0.08)',
+      border: '2px solid rgba(37, 99, 235, 0.8)',
+      boxShadow: '0 0 20px rgba(37, 99, 235, 0.6), inset 0 0 12px rgba(37, 99, 235, 0.3)',
       opacity: 1,
     },
     magnetic: {
-      width: 44,
-      height: 44,
-      backgroundColor: 'rgba(255, 255, 255, 0)',
-      border: '2px solid #FFFFFF', // Mix-blend-difference will render white as blue/invert
-      opacity: 0.8,
+      width: 56,
+      height: 56,
+      backgroundColor: 'rgba(37, 99, 235, 0.12)',
+      border: '2px solid rgba(37, 99, 235, 0.9)',
+      boxShadow: '0 0 25px rgba(37, 99, 235, 0.7), inset 0 0 16px rgba(37, 99, 235, 0.4)',
+      opacity: 1,
     },
     text: {
+      width: 0,
+      height: 0,
+      opacity: 0,
+    },
+    hide: {
+      width: 0,
+      height: 0,
+      opacity: 0,
+    },
+  };
+
+  // Inner dot variants
+  const dotVariants = {
+    default: {
+      width: 6,
+      height: 6,
+      backgroundColor: '#2563eb',
+      boxShadow: '0 0 8px rgba(37, 99, 235, 0.8)',
+      borderRadius: '50%',
+      opacity: 1,
+    },
+    hover: {
+      width: 8,
+      height: 8,
+      backgroundColor: '#1d4ed8',
+      boxShadow: '0 0 12px rgba(29, 78, 216, 0.9)',
+      borderRadius: '50%',
+      opacity: 1,
+    },
+    magnetic: {
       width: 4,
+      height: 4,
+      backgroundColor: '#1d4ed8',
+      boxShadow: '0 0 8px rgba(29, 78, 216, 0.8)',
+      borderRadius: '50%',
+      opacity: 0.6,
+    },
+    text: {
+      width: 2,
       height: 24,
-      borderRadius: '2px',
-      backgroundColor: '#FFFFFF',
-      border: 'none',
+      backgroundColor: '#2563eb',
+      boxShadow: '0 0 8px rgba(37, 99, 235, 0.6)',
+      borderRadius: '1px',
       opacity: 1,
     },
     hide: {
@@ -81,24 +127,41 @@ export const Cursor = () => {
   if (!isVisible) return null;
 
   return (
-    <motion.div
-      className="fixed top-0 left-0 rounded-full pointer-events-none z-[99999] hidden md:flex items-center justify-center mix-blend-difference"
-      style={{
-        x: cursorX,
-        y: cursorY,
-        translateX: '-50%',
-        translateY: '-50%',
-      }}
-      animate={cursorType}
-      variants={variants}
-      transition={{ type: 'spring', ...springConfig }}
-    >
-      {cursorText && (
-        <span className="text-[9px] text-white font-bold uppercase tracking-wider whitespace-nowrap">
-          {cursorText}
-        </span>
-      )}
-    </motion.div>
+    <>
+      {/* Outer Glow Ring */}
+      <motion.div
+        className="fixed top-0 left-0 rounded-full pointer-events-none z-[99999] hidden md:flex items-center justify-center mix-blend-normal"
+        style={{
+          x: ringX,
+          y: ringY,
+          translateX: '-50%',
+          translateY: '-50%',
+        }}
+        animate={cursorType}
+        variants={ringVariants}
+        transition={{ type: 'spring', ...ringSpringConfig }}
+      >
+        {cursorText && (
+          <span className="text-[9px] text-[#2563eb] font-bold uppercase tracking-wider whitespace-nowrap">
+            {cursorText}
+          </span>
+        )}
+      </motion.div>
+
+      {/* Inner Precision Dot */}
+      <motion.div
+        className="fixed top-0 left-0 rounded-full pointer-events-none z-[99999] hidden md:block mix-blend-normal"
+        style={{
+          x: dotX,
+          y: dotY,
+          translateX: '-50%',
+          translateY: '-50%',
+        }}
+        animate={cursorType}
+        variants={dotVariants}
+        transition={{ type: 'spring', ...dotSpringConfig }}
+      />
+    </>
   );
 };
 

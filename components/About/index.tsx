@@ -12,12 +12,12 @@ export const About = () => {
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
 
-    // 1. Smoothly fade the About section background from transparent to solid white
+    // 1. Smoothly fade the About section background from transparent to solid black (#0F0F0F)
     const bgScroll = gsap.fromTo(
       '.about-section',
-      { backgroundColor: 'rgba(255, 255, 255, 0)' },
+      { backgroundColor: 'rgba(15, 15, 15, 0)' },
       {
-        backgroundColor: 'rgba(255, 255, 255, 1)',
+        backgroundColor: '#0F0F0F',
         scrollTrigger: {
           trigger: '.about-section',
           start: 'top bottom',
@@ -82,8 +82,13 @@ export const About = () => {
             } else {
               const span = document.createElement('span');
               span.className = 'split-word inline-block';
-              if (node.parentNode && (node.parentNode as HTMLElement).classList.contains('text-navy')) {
-                span.classList.add('text-navy');
+              const parent = node.parentNode as HTMLElement;
+              if (parent) {
+                if (parent.classList.contains('text-navy')) {
+                  span.classList.add('text-navy');
+                } else if (parent.classList.contains('text-blue-400')) {
+                  span.classList.add('text-blue-400');
+                }
               }
               span.textContent = word;
               fragment.appendChild(span);
@@ -184,19 +189,19 @@ export const About = () => {
   }, []);
 
   return (
-    <Section id="about" bg="white" className="about-section z-10" style={{ backgroundColor: 'rgba(255, 255, 255, 0)' }}>
+    <Section id="about" className="about-section z-10 text-white" style={{ backgroundColor: 'rgba(15, 15, 15, 0)' }}>
       <Container className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
         {/* Editorial Section Indicator - Grid Span 4 */}
         <div className="lg:col-span-4 flex flex-col items-start lg:sticky lg:top-28 h-fit select-none">
           <span className="font-body text-[10px] md:text-xs font-bold tracking-widest text-navy uppercase mb-3 block about-indicator opacity-0">
             01 / STORY
           </span>
-          <Heading level={2} className="tracking-tighter about-heading font-logo italic font-light overflow-hidden py-1">
+          <Heading level={2} className="tracking-tighter about-heading font-logo italic font-light overflow-hidden py-1 text-white">
             {splitWords('About Me').map((word) => (
               <span key={word.id} className="inline-block overflow-hidden mr-3">
-                <span className="about-heading-word inline-block translate-y-[100%] transition-colors duration-300 hover:text-navy">
+                <span className="about-heading-word inline-block translate-y-[100%] transition-colors duration-300 hover:text-blue-400">
                   {word.text === 'Me' ? (
-                    <span className="text-navy bg-gradient-to-r from-navy via-blue-500 to-navy bg-clip-text text-transparent font-normal not-italic">
+                    <span className="text-blue-400 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-400 bg-clip-text text-transparent font-normal not-italic">
                       Me
                     </span>
                   ) : (
@@ -209,9 +214,9 @@ export const About = () => {
         </div>
 
         {/* Narrative Columns - Grid Span 8 */}
-        <div className="lg:col-span-8 flex flex-col gap-8 text-neutral-500 font-body text-base md:text-lg font-light leading-relaxed about-text-wrap select-none">
-          <p className="text-[#0F0F0F] font-semibold text-lg md:text-xl leading-relaxed about-paragraph opacity-0">
-            I am a <span className="text-navy">Computer Science and Business Systems</span> engineer driven by a passion for crafting high-fidelity digital systems and solving complex structural challenges.
+        <div className="lg:col-span-8 flex flex-col gap-8 text-neutral-300 font-body text-base md:text-lg font-light leading-relaxed about-text-wrap select-none">
+          <p className="text-white font-semibold text-lg md:text-xl leading-relaxed about-paragraph opacity-0">
+            I am a <span className="text-blue-400">Computer Science and Business Systems</span> engineer driven by a passion for crafting high-fidelity digital systems and solving complex structural challenges.
           </p>
 
           <p className="about-paragraph opacity-0">

@@ -58,7 +58,11 @@ export const Hero: React.FC<HeroProps> = ({ isLoaded }) => {
     });
 
     // 1. Portrait: Scale down, shift slightly, and fade
-    exitTl.to('.hero-portrait-wrap', {
+    exitTl.fromTo('.hero-portrait-wrap', {
+      scale: 1,
+      yPercent: 0,
+      opacity: 1
+    }, {
       scale: 0.72,
       yPercent: -15,
       opacity: 0.05,
@@ -66,7 +70,10 @@ export const Hero: React.FC<HeroProps> = ({ isLoaded }) => {
     }, 0);
 
     // 2. Text Column (Heading, badge, paragraph, CTA buttons, socials)
-    exitTl.to('#home .lg\\:col-span-7 > *', {
+    exitTl.fromTo('#home .lg\\:col-span-7 > *', {
+      yPercent: 0,
+      opacity: 1
+    }, {
       yPercent: -20,
       opacity: 0,
       stagger: 0.03,
@@ -74,7 +81,10 @@ export const Hero: React.FC<HeroProps> = ({ isLoaded }) => {
     }, 0);
 
     // 3. Floating widget badges
-    exitTl.to('.hero-floating-badge', {
+    exitTl.fromTo('.hero-floating-badge', {
+      yPercent: 0,
+      opacity: 1
+    }, {
       yPercent: -35,
       opacity: 0,
       stagger: 0.04,
@@ -82,35 +92,50 @@ export const Hero: React.FC<HeroProps> = ({ isLoaded }) => {
     }, 0);
 
     // 4. Background Ambient Elements (Parallax layers moving at offset directions)
-    exitTl.to('.bg-glow-element', {
+    exitTl.fromTo('.bg-glow-element', {
+      yPercent: 0,
+      opacity: 1
+    }, {
       yPercent: 30,
       opacity: 0,
       stagger: 0.03,
       ease: 'none'
     }, 0);
 
-    exitTl.to('.bg-glass-element', {
+    exitTl.fromTo('.bg-glass-element', {
+      yPercent: 0,
+      opacity: 1
+    }, {
       yPercent: -20,
       opacity: 0,
       stagger: 0.03,
       ease: 'none'
     }, 0);
 
-    exitTl.to('.bg-svg-element', {
+    exitTl.fromTo('.bg-svg-element', {
+      yPercent: 0,
+      opacity: 0.2
+    }, {
       yPercent: -35,
       opacity: 0,
       stagger: 0.04,
       ease: 'none'
     }, 0);
 
-    exitTl.to('.bg-particle-element', {
+    exitTl.fromTo('.bg-particle-element', {
+      yPercent: 0,
+      opacity: 1
+    }, {
       yPercent: -50,
       opacity: 0,
       ease: 'none'
     }, 0);
 
     // 5. Scroll indicator
-    exitTl.to('.hero-scroll-indicator', {
+    exitTl.fromTo('.hero-scroll-indicator', {
+      opacity: 1,
+      yPercent: 0
+    }, {
       opacity: 0,
       yPercent: -15,
       ease: 'none'

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Loader from '../components/ui/Loader';
 import Cursor from '../components/ui/Cursor';
 import WebGLBackground from '../components/ui/WebGLBackground';
@@ -14,9 +14,28 @@ import Achievements from '../components/Achievements';
 import Certifications from '../components/Certifications';
 import Contact from '../components/Contact';
 import Footer from '../components/Footer';
+import { useLenis } from '../providers/LenisProvider';
+import ScrollToTop from '../components/ui/ScrollToTop';
 
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false);
+  const lenis = useLenis();
+
+  // Scroll to top immediately on initial component mount to hide browser scroll memory
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Force scroll to top when load animation finishes
+  useEffect(() => {
+    if (isLoaded) {
+      if (lenis) {
+        lenis.scrollTo(0, { immediate: true });
+      } else {
+        window.scrollTo(0, 0);
+      }
+    }
+  }, [isLoaded, lenis]);
 
   return (
     <>
@@ -31,6 +50,9 @@ export default function Home() {
 
       {/* Floating glass navigation bar */}
       <Navbar />
+
+      {/* Scroll to Top Button */}
+      <ScrollToTop />
 
       {/* Main Single Page Layout Container */}
       <main className="w-full relative min-h-screen">

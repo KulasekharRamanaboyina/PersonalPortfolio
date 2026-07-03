@@ -138,7 +138,7 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({ exp, className = '', is
 
   return (
     <div
-      className={`exp-inner-card bg-white frosted-noise rounded-[24px] p-6 text-left select-none relative group cursor-pointer overflow-hidden border border-neutral-200/60 transition-all duration-500 ${className}`}
+      className={`exp-inner-card bg-white frosted-noise rounded-[20px] md:rounded-[24px] p-5 md:p-6 text-left select-none relative group cursor-pointer overflow-hidden border border-neutral-200/60 transition-all duration-500 ${className}`}
       style={{
         backgroundColor: '#ffffff',
         ...tiltStyle
@@ -166,44 +166,44 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({ exp, className = '', is
       <div className="relative z-10 flex flex-col h-full justify-between">
         <div>
           {/* Header - Logo on left, Duration on right */}
-          <div className="flex justify-between items-center mb-4 w-full">
-            <div className="w-12 h-12 rounded-full border border-neutral-200 bg-neutral-900 flex items-center justify-center group-hover:border-navy/40 transition-all duration-300 flex-shrink-0 overflow-hidden">
+          <div className="flex justify-between items-center mb-3 md:mb-4 w-full">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-neutral-200 bg-neutral-900 flex items-center justify-center group-hover:border-navy/40 transition-all duration-300 flex-shrink-0 overflow-hidden">
               {exp.logoIcon}
             </div>
-            <span className="font-body text-xs font-semibold text-neutral-500">
+            <span className="font-body text-[10px] md:text-xs font-semibold text-neutral-500">
               {exp.period}
             </span>
           </div>
 
           {/* Job title */}
-          <h3 className="font-heading text-lg md:text-xl font-bold text-neutral-900 mb-1.5 leading-snug">
+          <h3 className="font-heading text-base md:text-xl font-bold text-neutral-900 mb-1.5 leading-snug">
             {exp.role}
           </h3>
 
           {/* Company and badge */}
-          <div className="flex items-center gap-2 mb-4">
-            <h4 className="font-heading text-xs md:text-sm font-semibold text-navy">
+          <div className="flex items-center gap-2 mb-3 md:mb-4">
+            <h4 className="font-heading text-[11px] md:text-sm font-semibold text-navy">
               {exp.company}
             </h4>
-            <span className="px-2 py-0.5 rounded border border-navy/20 bg-navy/5 text-navy font-body text-[8px] font-bold uppercase tracking-wider">
+            <span className="px-1.5 py-0.5 rounded border border-navy/20 bg-navy/5 text-navy font-body text-[7px] md:text-[8px] font-bold uppercase tracking-wider">
               {exp.type}
             </span>
           </div>
 
           {/* Professional summary */}
-          <p className="font-body text-xs text-neutral-600 font-light mb-4 leading-relaxed">
+          <p className="font-body text-[11px] md:text-xs text-neutral-600 font-light mb-3 md:mb-4 leading-relaxed">
             {exp.summary}
           </p>
 
           {/* Dividing line separator */}
-          <div className="border-t border-neutral-200/50 w-full mb-4 pointer-events-none" />
+          <div className="border-t border-neutral-200/50 w-full mb-3 md:mb-4 pointer-events-none" />
 
           {/* Responsibilities list with custom blue dots */}
           <ul className="space-y-2">
             {exp.responsibilities.map((resp, rIdx) => (
               <li
                 key={rIdx}
-                className="font-body text-xs text-neutral-700 font-light leading-relaxed flex items-start gap-2.5"
+                className="font-body text-[11px] md:text-xs text-neutral-700 font-light leading-relaxed flex items-start gap-2"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-navy mt-1.5 flex-shrink-0 shadow-[0_0_4px_rgba(11,61,145,0.6)] animate-pulse" />
                 <span>{resp}</span>
@@ -220,7 +220,6 @@ export const Experience = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
-  const progressRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -228,7 +227,6 @@ export const Experience = () => {
     const section = sectionRef.current;
     const viewport = viewportRef.current;
     const track = trackRef.current;
-    const progress = progressRef.current;
 
     if (!section || !viewport || !track) return;
 
@@ -237,9 +235,6 @@ export const Experience = () => {
         const scrollDistance = Math.max(0, track.scrollWidth - viewport.clientWidth);
 
         gsap.set(track, { x: 0 });
-        if (progress) {
-          gsap.set(progress, { scaleX: 0, transformOrigin: 'left center' });
-        }
 
         if (scrollDistance < 8) {
           return undefined;
@@ -260,10 +255,6 @@ export const Experience = () => {
 
         timeline
           .to(track, { x: -scrollDistance }, 0);
-
-        if (progress) {
-          timeline.to(progress, { scaleX: 1 }, 0);
-        }
 
         const cards = gsap.utils.toArray<HTMLElement>('.experience-slide-card');
         const cardTriggers = cards.map((card) =>
@@ -315,9 +306,9 @@ export const Experience = () => {
       ref={sectionRef}
       id="experience"
       bg="white"
-      className="py-16 md:py-20 lg:py-24 min-h-screen flex items-center overflow-hidden"
+      className="py-8 md:py-20 lg:py-24 min-h-screen flex items-center overflow-hidden"
     >
-      <Container className="flex flex-col gap-10 lg:gap-12">
+      <Container className="flex flex-col gap-6 md:gap-10 lg:gap-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-end">
           <div className="lg:col-span-5">
             <Reveal animation="fade-up">
@@ -330,7 +321,7 @@ export const Experience = () => {
             </Reveal>
           </div>
 
-          <Reveal animation="fade-up" delay={0.08} className="lg:col-span-7">
+          <Reveal animation="fade-up" delay={0.08} className="lg:col-span-7 hidden md:block">
             <p className="font-body text-sm md:text-base text-neutral-500 font-light leading-relaxed max-w-2xl lg:ml-auto">
               Scroll down to move through the roles, internships, and product work that shaped my engineering practice.
             </p>
@@ -349,25 +340,16 @@ export const Experience = () => {
               {EXPERIENCES.map((exp) => (
                 <div
                   key={`${exp.company}-${exp.year}`}
-                  className="experience-slide-card relative w-[calc(100vw-3rem)] max-w-[380px] sm:w-[420px] sm:max-w-none lg:w-[470px] flex-shrink-0 py-6"
+                  className="experience-slide-card relative w-[calc(100vw-2.5rem)] max-w-[320px] sm:max-w-[380px] sm:w-[420px] lg:w-[470px] flex-shrink-0 py-3 md:py-6"
                 >
-                <div className="absolute -top-5 right-5 font-heading text-5xl md:text-6xl font-black text-neutral-100 select-none pointer-events-none z-0">
-                  {exp.year}
-                </div>
-                  <ExperienceCard exp={exp} className="h-full min-h-[360px]" isMobile={true} />
+                  <div className="absolute -top-5 right-5 font-heading text-5xl md:text-6xl font-black text-neutral-100 select-none pointer-events-none z-0">
+                    {exp.year}
+                  </div>
+                  <ExperienceCard exp={exp} className="h-full min-h-[280px] md:min-h-[360px]" isMobile={true} />
                 </div>
               ))}
             </div>
           </div>
-
-          <div className="mt-6 flex items-center gap-4">
-            <div className="h-px flex-1 bg-neutral-200 overflow-hidden">
-              <div ref={progressRef} className="h-full w-full origin-left scale-x-0 bg-navy" />
-            </div>
-            <span className="font-body text-[10px] font-bold uppercase tracking-widest text-neutral-400">
-              Scroll
-            </span>
-              </div>
         </div>
       </Container>
     </Section>

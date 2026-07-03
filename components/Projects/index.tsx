@@ -49,32 +49,35 @@ export const Projects = () => {
 
       const projectCards = gsap.utils.toArray<HTMLElement>('.project-card');
 
-      gsap.set(projectCards, {
-        opacity: 0,
-        x: (index) => {
-          const column = window.matchMedia('(min-width: 768px)').matches ? index % 3 : index % 2;
-          return column === 1 ? 120 : -120;
+      ScrollTrigger.create({
+        trigger: '.projects-grid',
+        start: 'top 68%',
+        once: true,
+        onEnter: () => {
+          gsap.fromTo(
+            projectCards,
+            {
+              opacity: 0,
+              x: (index) => {
+                const column = window.matchMedia('(min-width: 768px)').matches ? index % 3 : index % 2;
+                return column === 1 ? 120 : -120;
+              },
+              y: 26,
+              scale: 0.96,
+              filter: 'blur(10px)',
+            },
+            {
+              opacity: 1,
+              x: 0,
+              y: 0,
+              scale: 1,
+              filter: 'blur(0px)',
+              duration: 1.05,
+              ease: 'power4.out',
+              stagger: 0.09,
+            }
+          );
         },
-        y: 26,
-        scale: 0.96,
-        filter: 'blur(10px)',
-      });
-
-      gsap.timeline({
-        scrollTrigger: {
-          trigger: '.projects-grid',
-          start: 'top 68%',
-          once: true,
-        },
-      }).to(projectCards, {
-        opacity: 1,
-        x: 0,
-        y: 0,
-        scale: 1,
-        filter: 'blur(0px)',
-        duration: 1.05,
-        ease: 'power4.out',
-        stagger: 0.09,
       });
 
       // ── Desktop: 3D cube scroll ─────────────────────────────────────────
